@@ -49,7 +49,7 @@
  */
 void needle_temp_ctrl_task( void* pvParameters )
 {
-    double        vout = 0.0, ntc_curr_resistance = 0.0, temperature = 0.0;
+    double        vout = 0.0, ntc_curr_resistance = 0.0;
     uint32_t      adc_value = 0;
     GPIO_PinState flt       = GPIO_PIN_RESET;
     const double  R18       = 5100.0f; // 分压电阻 5.1K
@@ -57,7 +57,7 @@ void needle_temp_ctrl_task( void* pvParameters )
     const double  ADC_MAX   = 4096.0f; // 12位ADC
     const double  GAIN      = 0.2f;    // 运放增益 = 1 + (R8/R11) = 2
 
-    LOG( CAN_MODULE, "ntc task init complete" );
+    // LOG( CAN_MODULE, "ntc task init complete" );
 
     while ( true )
     {
@@ -91,22 +91,22 @@ void needle_temp_ctrl_task( void* pvParameters )
                     // 得出n份*0.1°C
                     double d2 = ( ( ( ntc_curr_resistance - min_resistance ) / d1 ) * ( 1 / 10 ) );
                     // 以上四步是求小数点温度
-                    temperature = lookUpTable[i].temperature + d2;
+                    needle_temperature = lookUpTable[i].temperature + d2;
                     break;
                 }
                 else
                 {
-                    temperature = lookUpTable[0].temperature;
+                    needle_temperature = lookUpTable[0].temperature;
                 }
             }
         }
-        LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", vin, ntc_curr_resistance, temperature );
+        // LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", vin, ntc_curr_resistance, needle_temperature );
         flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
-        if ( temperature > 35.0f || flt == GPIO_PIN_RESET )
+        /* if ( needle_temperature > 35.0f ||  flt == GPIO_PIN_RESET )
         {
             HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
-            LOG( CAN_MODULE, "ntc temp:%f, flt:%d, heat off", temperature, flt );
-        }
+            LOG( CAN_MODULE, "ntc temp:%f, flt:%d", needle_temperature, flt );
+        }*/
         /*else
         {
             HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );

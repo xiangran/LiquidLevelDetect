@@ -327,6 +327,7 @@ GLOBAL NTC10K_B3950_TypeDef lookUpTable[LOOK_UP_TABLE_ELEMENTS]
 #endif
 ;
 
+GLOBAL double needle_temperature;
 /* function prototypes */
 GLOBAL void needle_temp_ctrl_task( void* pvParameters );
 GLOBAL void cmd_task_entry( void* parameter );

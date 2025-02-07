@@ -94,7 +94,9 @@ void detect_liquid_level_task( void* pvParameters )
 
     // param.thrs1 = METHOD1_THRS;
     HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_RESET );
-    LOG( APP_MODULE, "init complete, noise: %d", noise );
+    osDelay( 500 );
+    HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
+    // LOG( APP_MODULE, "init complete, noise: %d", noise );
 
     while ( true )
     {
@@ -106,8 +108,8 @@ void detect_liquid_level_task( void* pvParameters )
             if ( liquid_level_detect_flag )
             {
                 voltage = ( double ) adc_value * 3.3 / 4096;
-                if ( voltage > 0.1 )
-                    printf( "%f\r\n", voltage );
+                // if ( voltage > 0.1 )
+                //     printf( "%f\r\n", voltage );
 
                 // 阈值法
                 if ( voltage > ( double ) param.thrs1 )
@@ -160,10 +162,10 @@ void detect_liquid_level_task( void* pvParameters )
             k_cnt           = 0;
             liquid_detected = false;
             HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_SET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+            HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_RESET );
             osDelay( 1000 );
             HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_RESET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
+            HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
             ring_buffer_clear( &liquid_ad_val );
             start_check_liquid_level();
         }

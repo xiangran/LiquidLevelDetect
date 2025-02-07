@@ -144,6 +144,14 @@ void heat_ctrl( int argc, char* argv[] )
         if ( ctrl == 1 )
         {
             HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
+            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+            LOG( CAN_MODULE, "heat on" );
+        }
+        else
+        {
+            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
+            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
+            LOG( CAN_MODULE, "heat off" );
         }
     }
 }
@@ -164,3 +172,19 @@ void liquid_level_ctrl( int argc, char* argv[] )
     }
 }
 SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, detect_start, liquid_level_ctrl, liquid level ctrl\n );
+
+/**
+ * \brief
+ * \param argc
+ * \param argv
+ * @date 2025-02-07
+ * \Author Jackie
+ */
+void needle_temp( int argc, char* argv[] )
+{
+    if ( argc == 1 )
+    {
+        LOG( CAN_MODULE, "needle temperature: %f", needle_temperature );
+    }
+}
+SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, temp, needle_temp, needle temp ctrl\n );
