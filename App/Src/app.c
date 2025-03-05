@@ -185,6 +185,26 @@ void adc_task( void* pvParameters )
     while ( true )
     {
         start_adc1_conv();
+
+        if ( HAL_GPIO_ReadPin( HOST_HEAT_CTRL_GPIO_Port, HOST_HEAT_CTRL_Pin ) == GPIO_PIN_RESET )
+        {
+            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
+            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+        }
+        else
+        {
+            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
+            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
+        }
+
+        if ( HAL_GPIO_ReadPin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_HEAT_CTRL_Pin ) == GPIO_PIN_RESET )
+        {
+            liquid_level_detect_flag = true;
+        }
+        else
+        {
+            liquid_level_detect_flag = false;
+        }
         osDelay( 10 );
     }
 }

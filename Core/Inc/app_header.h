@@ -56,7 +56,6 @@
 #include "dma.h"
 #include "needle_temp_ctrl.h"
 #include "flash.h"
-#include "canLayer.h"
 #include "clist.h"
 #include "app_queue.h"
 #include "usart.h"

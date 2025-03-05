@@ -90,7 +90,7 @@ int main( void )
     ad5160_init();
     DWT_Delay_Init();
     // MX_USART1_UART_Init();
-    MX_USART3_UART_Init();
+    // MX_USART3_UART_Init();
     /* USER CODE BEGIN 2 */
     printf( "===========Build Time " __DATE__ "===========\r\n" );
     printf( "===========sysclk [%dM], HAL version: 0x%08lx\r\n", HAL_RCC_GetHCLKFreq() / 1000000, HAL_GetHalVersion() );
@@ -98,7 +98,7 @@ int main( void )
 
     /* Init scheduler */
     osKernelInitialize();
-    USART_Prepare();
+    // USART_Prepare();
     /* Call init function for freertos objects (in cmsis_os2.c) */
     init_task();
 

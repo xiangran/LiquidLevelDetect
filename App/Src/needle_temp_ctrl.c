@@ -51,7 +51,7 @@ void needle_temp_ctrl_task( void* pvParameters )
 {
     double        vout = 0.0, ntc_curr_resistance = 0.0;
     uint32_t      adc_value = 0;
-    GPIO_PinState flt       = GPIO_PIN_RESET;
+    //GPIO_PinState flt       = GPIO_PIN_RESET;
     const double  R18       = 5100.0f; // 分压电阻 5.1K
     const double  VCC       = 3.3f;    // 参考电压
     const double  ADC_MAX   = 4096.0f; // 12位ADC
@@ -101,16 +101,8 @@ void needle_temp_ctrl_task( void* pvParameters )
             }
         }
         // LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", vin, ntc_curr_resistance, needle_temperature );
-        flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
-        /* if ( needle_temperature > 35.0f ||  flt == GPIO_PIN_RESET )
-        {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
-            LOG( CAN_MODULE, "ntc temp:%f, flt:%d", needle_temperature, flt );
-        }*/
-        /*else
-        {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
-        }*/
+        // flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
+
         osDelay( 1000 );
     }
 }
