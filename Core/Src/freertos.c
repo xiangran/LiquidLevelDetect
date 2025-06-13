@@ -120,7 +120,7 @@ void init_task( void )
     /* creation of defaultTask */
     detect_liquid_level_task_handle = osThreadNew( detect_liquid_level_task, NULL, &detect_liquid_level_task_attributes );
     needle_temp_ctrl_task_handle    = osThreadNew( needle_temp_ctrl_task, NULL, &needle_temp_ctrl_task_attributes );
-    adc_task_handle                 = osThreadNew( adc_task, NULL, &adc_task_attributes );
+    // adc_task_handle                 = osThreadNew( adc_task, NULL, &adc_task_attributes );
 
     /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */

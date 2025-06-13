@@ -180,7 +180,7 @@ void detect_liquid_level_task( void* pvParameters )
  * @date 2025-01-22
  * \Author Jackie
  */
-void adc_task( void* pvParameters )
+/*void adc_task( void* pvParameters )
 {
     while ( true )
     {
@@ -214,7 +214,7 @@ void adc_task( void* pvParameters )
         }
         osDelay( 10 );
     }
-}
+}*/
 
 /**
  * \brief 获取重启原因并清除状态位
