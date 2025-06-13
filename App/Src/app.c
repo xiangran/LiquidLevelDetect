@@ -54,8 +54,8 @@ void detect_liquid_level_task( void* pvParameters )
     bool     liquid_detected = false;
 
     ring_buffer_init( &liquid_ad_val, adc_value_buffer, SINE_WAVE_PERIOD );
-    // 设置采样数字电位计U2
-    ad5160_2_writeByte( 255 ); // param.U7_R
+    // 设置采样数字电位计U2,Rp1
+    ad5160_2_writeByte( param.U7_R ); // param.U7_R
 
     if ( liquid_ad_value_calibration() == 0 )
     {
@@ -105,11 +105,11 @@ void detect_liquid_level_task( void* pvParameters )
         {
             ring_buffer_read( &liquid_ad_val, &adc_value, 1 );
 
-            if ( liquid_level_detect_flag )
+            // if ( liquid_level_detect_flag )
             {
                 voltage = ( double ) adc_value * 3.3 / 4096;
-                // if ( voltage > 0.1 )
-                //     printf( "%f\r\n", voltage );
+                if ( voltage > 0.1 )
+                    printf( "%f\r\n", voltage );
 
                 // 阈值法
                 if ( voltage > ( double ) param.thrs1 )
@@ -147,12 +147,12 @@ void detect_liquid_level_task( void* pvParameters )
         // 阈值
         if ( thrs_cnt )
         {
-            HAL_ADC_Stop_IT( &hadc2 );
+            HAL_ADC_Stop_DMA( &hadc2 );
             liquid_detected = true;
         }
         else if ( k_cnt > 2 ) // 斜率
         {
-            HAL_ADC_Stop_IT( &hadc2 );
+            HAL_ADC_Stop_DMA( &hadc2 );
             liquid_detected = true;
         }
 
@@ -162,9 +162,11 @@ void detect_liquid_level_task( void* pvParameters )
             k_cnt           = 0;
             liquid_detected = false;
             HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_SET );
+            // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_RESET );
             HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_RESET );
             osDelay( 1000 );
             HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_RESET );
+            // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_SET );
             HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
             ring_buffer_clear( &liquid_ad_val );
             start_check_liquid_level();
@@ -180,30 +182,35 @@ void detect_liquid_level_task( void* pvParameters )
  */
 void adc_task( void* pvParameters )
 {
-    HAL_ADCEx_Calibration_Start( &hadc1, ADC_SINGLE_ENDED );
-
     while ( true )
     {
-        start_adc1_conv();
+        // start_adc1_conv();
+        if ( !debug_mode )
+        {
+            if ( HAL_GPIO_ReadPin( HOST_HEAT_CTRL_GPIO_Port, HOST_HEAT_CTRL_Pin ) == GPIO_PIN_RESET )
+            {
+                liquid_level_detect_flag = true;
+                host_ctrl_init_flag      = true;
+                // HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
+                // HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+            }
+            else
+            {
+                if ( host_ctrl_init_flag ) // 驱动板是否已经初始化过，默认电平为低
+                {
+                    // HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
+                    // HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+                }
+            }
+        }
 
-        if ( HAL_GPIO_ReadPin( HOST_HEAT_CTRL_GPIO_Port, HOST_HEAT_CTRL_Pin ) == GPIO_PIN_RESET )
+        // if ( HAL_GPIO_ReadPin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin ) == GPIO_PIN_RESET )
         {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+            // liquid_level_detect_flag = true;
         }
-        else
+        // else
         {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
-        }
-
-        if ( HAL_GPIO_ReadPin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_HEAT_CTRL_Pin ) == GPIO_PIN_RESET )
-        {
-            liquid_level_detect_flag = true;
-        }
-        else
-        {
-            liquid_level_detect_flag = false;
+            // liquid_level_detect_flag = false;
         }
         osDelay( 10 );
     }

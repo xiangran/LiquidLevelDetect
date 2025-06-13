@@ -26,6 +26,7 @@ extern "C"
 {
 #endif
 #define ADC1_CHANNEL_NUM 2
+#define ADC2_CHANNEL_NUM 1
 
 /* Includes ------------------------------------------------------------------*/
 #undef GLOBAL
@@ -42,6 +43,7 @@ extern "C"
     GLOBAL ADC_HandleTypeDef hadc1;
     GLOBAL ADC_HandleTypeDef hadc2;
     GLOBAL DMA_HandleTypeDef hdma_adc1;
+	GLOBAL DMA_HandleTypeDef hdma_adc2;
     /* USER CODE BEGIN Private defines */
 
     /* USER CODE END Private defines */

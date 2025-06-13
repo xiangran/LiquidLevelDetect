@@ -107,11 +107,68 @@ void u7_r( int argc, char* argv[] )
     {
         int r      = atoi( argv[1] );
         param.U7_R = r;
+        ad5160_2_writeByte( r );
         param.crc8 = crc8( ( uint8_t* ) &param, offsetof( LiquidDecte_TypeDef, crc8 ) );
-        save_data( CONFIG_FLASH_ADDR, ( uint32_t* ) &param, sizeof( param ) / 4 );
+        save_data( CONFIG_FLASH_ADDR, ( uint32_t* ) &param, sizeof( param ) / 8 );
     }
 }
 SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, u7_r, u7_r, config U7 R value\n );
+
+/**
+ * \brief
+ * \param argc
+ * \param argv
+ * @date 2025-05-22
+ * \Author Jackie
+ */
+void u1_r( int argc, char* argv[] )
+{
+    if ( argc == 2 )
+    {
+        int r = atoi( argv[1] );
+        ad5160_1_writeByte( r );
+        param.U1_R = r;
+        param.crc8 = crc8( ( uint8_t* ) &param, offsetof( LiquidDecte_TypeDef, crc8 ) );
+        save_data( CONFIG_FLASH_ADDR, ( uint32_t* ) &param, sizeof( param ) / 8 );
+    }
+}
+SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, u1_r, u1_r, config U1 R value\n );
+
+/**
+ * \brief
+ * \param argc
+ * \param argv
+ * @date 2025-05-22
+ * \Author Jackie
+ */
+void adc_sf( int argc, char* argv[] )
+{
+    if ( argc == 1 )
+    {
+        uint32_t adc_value = adc_chn_average_value( STABLE_POINT_Pin, 10 );
+        double   volt      = ( double ) adc_value * 3.3 / 4096;
+        LOG( LIQUID_MODULE, "adc_sf = %f", volt );
+    }
+}
+SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, adc_sf, adc_sf, adc sf\n );
+
+/**
+ * \brief
+ * \param argc
+ * \param argv
+ * @date 2025-05-22
+ * \Author Jackie
+ */
+void adc_pll( int argc, char* argv[] )
+{
+    if ( argc == 1 )
+    {
+        uint32_t adc_value = adc_chn_average_value( LIQUID_DET_ADC_Pin, 10 );
+        double   volt2     = ( double ) adc_value * 3.3 / 4096;
+        LOG( LIQUID_MODULE, "adc_pll = %f", volt2 );
+    }
+}
+SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, adc_pll, adc_pll, adc pll\n );
 
 /**
  * \brief
@@ -124,7 +181,7 @@ void debug_info( int argc, char* argv[] )
 {
     if ( argc == 1 )
     {
-        LOG( CMD_MODULE, "thrs1: %f, thrs2: %f, u7_r: %d", ( double ) param.thrs1, ( double ) param.thrs2, param.U7_R );
+        LOG( CMD_MODULE, "thrs1: %f, thrs2: %f, u7_r: %d, u1_r: %d", ( double ) param.thrs1, ( double ) param.thrs2, param.U7_R, param.U1_R );
     }
 }
 SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, params, debug_info, display params\n );
@@ -138,9 +195,11 @@ SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAI
  */
 void heat_ctrl( int argc, char* argv[] )
 {
-    if ( argc == 2 )
+    if ( argc == 3 )
     {
-        int ctrl = atoi( argv[1] );
+        int ctrl   = atoi( argv[2] );
+        debug_mode = atoi( argv[1] );
+
         if ( ctrl == 1 )
         {
             HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );

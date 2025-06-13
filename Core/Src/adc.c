@@ -23,8 +23,8 @@
 #undef ADC_C
 
 /* USER CODE BEGIN 0 */
-static uint16_t adc1_dma_buffer[ADC1_CHANNEL_NUM];
-
+static uint32_t adc1_dma_buffer[ADC1_CHANNEL_NUM];
+static uint32_t adc2_dma_buffer[ADC2_CHANNEL_NUM];
 /* USER CODE END 0 */
 
 /* ADC1 init function */
@@ -52,12 +52,12 @@ void MX_ADC1_Init()
     hadc1.Init.ScanConvMode          = ADC_SCAN_ENABLE;
     hadc1.Init.EOCSelection          = ADC_EOC_SINGLE_CONV;
     hadc1.Init.LowPowerAutoWait      = DISABLE;
-    hadc1.Init.ContinuousConvMode    = DISABLE;
+    hadc1.Init.ContinuousConvMode    = ENABLE;
     hadc1.Init.NbrOfConversion       = 2;
     hadc1.Init.DiscontinuousConvMode = DISABLE;
     hadc1.Init.ExternalTrigConv      = ADC_SOFTWARE_START;
     hadc1.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hadc1.Init.DMAContinuousRequests = DISABLE;
+    hadc1.Init.DMAContinuousRequests = ENABLE;
     hadc1.Init.Overrun               = ADC_OVR_DATA_PRESERVED;
     hadc1.Init.OversamplingMode      = DISABLE;
     if ( HAL_ADC_Init( &hadc1 ) != HAL_OK )
@@ -77,7 +77,7 @@ void MX_ADC1_Init()
      */
     sConfig.Channel      = ADC_CHANNEL_12;
     sConfig.Rank         = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;
+    sConfig.SamplingTime = ADC_SAMPLETIME_640CYCLES_5;
     sConfig.SingleDiff   = ADC_SINGLE_ENDED;
     sConfig.OffsetNumber = ADC_OFFSET_NONE;
     sConfig.Offset       = 0;
@@ -95,7 +95,8 @@ void MX_ADC1_Init()
         Error_Handler();
     }
     /* USER CODE BEGIN ADC1_Init 2 */
-
+    HAL_ADCEx_Calibration_Start( &hadc1, ADC_SINGLE_ENDED );
+    HAL_ADC_Start_DMA( &hadc1, ( uint32_t* ) &adc1_dma_buffer, ADC1_CHANNEL_NUM );
     /* USER CODE END ADC1_Init 2 */
 }
 /* ADC2 init function */
@@ -127,7 +128,7 @@ void MX_ADC2_Init( void )
     hadc2.Init.DiscontinuousConvMode = DISABLE;
     hadc2.Init.ExternalTrigConv      = ADC_SOFTWARE_START;
     hadc2.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
-    hadc2.Init.DMAContinuousRequests = DISABLE;
+    hadc2.Init.DMAContinuousRequests = ENABLE;
     hadc2.Init.Overrun               = ADC_OVR_DATA_PRESERVED;
     hadc2.Init.OversamplingMode      = DISABLE;
     if ( HAL_ADC_Init( &hadc2 ) != HAL_OK )
@@ -148,7 +149,7 @@ void MX_ADC2_Init( void )
         Error_Handler();
     }
     /* USER CODE BEGIN ADC2_Init 2 */
-
+    HAL_ADCEx_Calibration_Start( &hadc2, ADC_SINGLE_ENDED );
     /* USER CODE END ADC2_Init 2 */
 }
 
@@ -198,9 +199,9 @@ void HAL_ADC_MspInit( ADC_HandleTypeDef* adcHandle )
         hdma_adc1.Init.Direction           = DMA_PERIPH_TO_MEMORY;
         hdma_adc1.Init.PeriphInc           = DMA_PINC_DISABLE;
         hdma_adc1.Init.MemInc              = DMA_MINC_ENABLE;
-        hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-        hdma_adc1.Init.MemDataAlignment    = DMA_MDATAALIGN_HALFWORD;
-        hdma_adc1.Init.Mode                = DMA_NORMAL;
+        hdma_adc1.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+        hdma_adc1.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+        hdma_adc1.Init.Mode                = DMA_CIRCULAR;
         hdma_adc1.Init.Priority            = DMA_PRIORITY_LOW;
         if ( HAL_DMA_Init( &hdma_adc1 ) != HAL_OK )
         {
@@ -209,9 +210,6 @@ void HAL_ADC_MspInit( ADC_HandleTypeDef* adcHandle )
 
         __HAL_LINKDMA( adcHandle, DMA_Handle, hdma_adc1 );
 
-        /* ADC1 interrupt Init */
-        HAL_NVIC_SetPriority( ADC1_2_IRQn, 5, 0 );
-        HAL_NVIC_EnableIRQ( ADC1_2_IRQn );
         /* USER CODE BEGIN ADC1_MspInit 1 */
 
         /* USER CODE END ADC1_MspInit 1 */
@@ -247,9 +245,24 @@ void HAL_ADC_MspInit( ADC_HandleTypeDef* adcHandle )
         GPIO_InitStruct.Pull = GPIO_PULLUP;
         HAL_GPIO_Init( LIQUID_DET_ADC_GPIO_Port, &GPIO_InitStruct );
 
-        /* ADC2 interrupt Init */
-        HAL_NVIC_SetPriority( ADC1_2_IRQn, 5, 0 );
-        HAL_NVIC_EnableIRQ( ADC1_2_IRQn );
+        /* ADC2 DMA Init */
+        /* ADC2 Init */
+        hdma_adc2.Instance                 = DMA1_Channel2;
+        hdma_adc2.Init.Request             = DMA_REQUEST_ADC2;
+        hdma_adc2.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+        hdma_adc2.Init.PeriphInc           = DMA_PINC_DISABLE;
+        hdma_adc2.Init.MemInc              = DMA_MINC_ENABLE;
+        hdma_adc2.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+        hdma_adc2.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+        hdma_adc2.Init.Mode                = DMA_CIRCULAR;
+        hdma_adc2.Init.Priority            = DMA_PRIORITY_LOW;
+        if ( HAL_DMA_Init( &hdma_adc2 ) != HAL_OK )
+        {
+            Error_Handler();
+        }
+
+        __HAL_LINKDMA( adcHandle, DMA_Handle, hdma_adc2 );
+
         /* USER CODE BEGIN ADC2_MspInit 1 */
 
         /* USER CODE END ADC2_MspInit 1 */
@@ -310,6 +323,18 @@ void HAL_ADC_MspDeInit( ADC_HandleTypeDef* adcHandle )
         */
         HAL_GPIO_DeInit( LIQUID_DET_ADC_GPIO_Port, LIQUID_DET_ADC_Pin );
 
+        /* ADC2 DMA DeInit */
+        HAL_DMA_DeInit( adcHandle->DMA_Handle );
+
+        /* ADC2 interrupt Deinit */
+        /* USER CODE BEGIN ADC2:ADC1_2_IRQn disable */
+        /**
+         * Uncomment the line below to disable the "ADC1_2_IRQn" interrupt
+         * Be aware, disabling shared interrupt may affect other IPs
+         */
+        /* HAL_NVIC_DisableIRQ(ADC1_2_IRQn); */
+        /* USER CODE END ADC2:ADC1_2_IRQn disable */
+
         /* USER CODE BEGIN ADC2_MspDeInit 1 */
 
         /* USER CODE END ADC2_MspDeInit 1 */
@@ -321,10 +346,21 @@ uint32_t adc_chn_average_value( uint16_t chn, uint8_t times )
 {
     uint32_t           sum    = 0;
     ADC_HandleTypeDef* handle = NULL;
+    uint32_t           buffer[32];
+    // 找出最大最小值
+    uint32_t max_val = 0;
+    uint32_t min_val = 0xffffffff;
 
-    if ( chn == STABLE_POINT_Pin || MCU_NTC_Pin )
-    {
+    if ( chn == MCU_NTC_Pin )
         return 0;
+
+    if ( chn == STABLE_POINT_Pin )
+    {
+#if 0 // USE DMA instead
+      // handle = &hadc1;
+#else
+        return get_adc1_value( ADC_CHANNEL_12 );
+#endif
     }
     else
     {
@@ -338,11 +374,28 @@ uint32_t adc_chn_average_value( uint16_t chn, uint8_t times )
 
         if ( ( HAL_ADC_GetState( handle ) & HAL_ADC_STATE_REG_EOC ) == HAL_ADC_STATE_REG_EOC )
         {
-            sum += HAL_ADC_GetValue( handle );
+            buffer[i] = HAL_ADC_GetValue( handle );
+            if ( buffer[i] > max_val )
+                max_val = buffer[i];
+            if ( buffer[i] < min_val )
+                min_val = buffer[i];
         }
         HAL_ADC_Stop( handle );
         osDelay( 2 );
     }
+
+    // 去掉最大最小值后求和
+    sum = 0;
+    for ( int j = 0; j < times; j++ )
+    {
+        if ( buffer[j] != max_val && buffer[j] != min_val )
+        {
+            sum += buffer[j];
+        }
+    }
+
+    // 修正平均值计算的分母
+    times -= 2;
 
     return ( uint16_t ) ( sum / times );
 }
@@ -352,14 +405,7 @@ uint32_t adc_chn_average_value( uint16_t chn, uint8_t times )
  * @date 2023-11-30
  * \Author Jackie
  */
-void start_check_liquid_level() { HAL_ADC_Start_IT( &hadc2 ); }
-
-/**
- * \brief
- * @date 2025-01-21
- * \Author Jackie
- */
-void start_adc1_conv() { HAL_ADC_Start_DMA( &hadc1, ( uint32_t* ) &adc1_dma_buffer, ADC1_CHANNEL_NUM ); }
+void start_check_liquid_level() { HAL_ADC_Start_DMA( &hadc2, ( uint32_t* ) &adc2_dma_buffer, ADC2_CHANNEL_NUM ); }
 
 /**
  * \brief
@@ -398,7 +444,8 @@ void HAL_ADC_ConvCpltCallback( ADC_HandleTypeDef* hadc )
 
     if ( hadc->Instance == ADC2 )
     {
-        val = HAL_ADC_GetValue( hadc );
+        // val = HAL_ADC_GetValue( hadc );
+        val = adc2_dma_buffer[0];
 
         if ( read_noise )
         {
@@ -411,11 +458,18 @@ void HAL_ADC_ConvCpltCallback( ADC_HandleTypeDef* hadc )
         }
         else
         {
-            if ( val > noise )
+            // if ( val > noise )
             {
                 ring_buffer_save_isr( &liquid_ad_val, val );
             }
         }
+        // HAL_ADC_Start_DMA( &hadc2, ( uint32_t* ) &adc2_dma_buffer, ADC2_CHANNEL_NUM );
+    }
+    else if ( hadc->Instance == ADC1 )
+    {
+        adc1_value_buffer[0] = adc1_dma_buffer[0];
+        adc1_value_buffer[1] = adc1_dma_buffer[1];
+        // HAL_ADC_Start_DMA( &hadc1, ( uint32_t* ) &adc1_dma_buffer, ADC1_CHANNEL_NUM );
     }
 }
 /* USER CODE END 1 */

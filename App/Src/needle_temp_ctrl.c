@@ -49,32 +49,28 @@
  */
 void needle_temp_ctrl_task( void* pvParameters )
 {
-    double        vout = 0.0, ntc_curr_resistance = 0.0;
-    uint32_t      adc_value = 0;
-    //GPIO_PinState flt       = GPIO_PIN_RESET;
-    const double  R18       = 5100.0f; // 分压电阻 5.1K
-    const double  VCC       = 3.3f;    // 参考电压
-    const double  ADC_MAX   = 4096.0f; // 12位ADC
-    const double  GAIN      = 0.2f;    // 运放增益 = 1 + (R8/R11) = 2
+    double   v_adc_ntc = 0.0, ntc_curr_resistance = 0.0;
+    uint32_t adc_value = 0;
+    // GPIO_PinState flt       = GPIO_PIN_RESET;
+    const double R18     = 5100.0f; // 分压电阻 5.1K
+    const double VCC     = 3.3f;    // 参考电压
+    const double ADC_MAX = 4096.0f; // 12位ADC
+    const double GAIN    = 2.0;     // 运放增益 = 1 + (R8/R11) = 2
 
     // LOG( CAN_MODULE, "ntc task init complete" );
 
     while ( true )
     {
         adc_value = get_adc1_value( ADC_CHANNEL_15 );
-        vout      = ( double ) adc_value * VCC / ADC_MAX;
-        // 考虑运放增益
-        // 增益 = 1 + (R8/R11) = 2 (因为R8=R11=10K)
-        double vin = vout / GAIN;
+        v_adc_ntc = ( double ) adc_value * VCC / ADC_MAX;
+        // 同相放大2倍
+        double v_AOUT = v_adc_ntc / GAIN;
 
-        // 根据分压公式计算NTC电阻值
-        // vin = Vcc * (R18/(R18 + NTC))
-        // 其中 R18 = 5.1K
-        if ( vin < 0.001f )
-            vin = 0.001f; // 防止除零
-        else if ( vin > VCC )
-            vin = VCC;
-        ntc_curr_resistance = R18 * ( VCC / vin - 1 );
+        // KCL: V_N1 / R_A + (V_N1 - V_out) / R_B + (V_N1 - 3.3V) / R_C = 0
+        // V_N1 / 1kΩ + (V_N1 - V_out) / 1.5kΩ + (V_N1 - 3.3V) / 1kΩ = 0
+        // V_N1 = (9.9 + 2 * V_out) / 8
+        double v            = ( 9.9 + 2 * v_AOUT ) / 8; // V_out为负, v为反相输入端电压
+        ntc_curr_resistance = R18 * ( VCC - v ) / v;
 
         for ( int i = 0; i < LOOK_UP_TABLE_ELEMENTS; i++ )
         {
@@ -100,7 +96,7 @@ void needle_temp_ctrl_task( void* pvParameters )
                 }
             }
         }
-        // LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", vin, ntc_curr_resistance, needle_temperature );
+        LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", v_adc_ntc, ntc_curr_resistance, needle_temperature );
         // flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
 
         osDelay( 1000 );

@@ -39,7 +39,7 @@
 /* static function prototypes */
 /*!
  * \fn     liquid_ad_value_calibration
- * \brief
+ * \brief 设置中心频率
  *
  *
  * \retval void
@@ -48,8 +48,9 @@
  */
 int8_t liquid_ad_value_calibration()
 {
+    int8_t ret = 0;
+#if 0
     uint8_t  potentioData = 127, calibrate_cnt = 0;
-    int8_t   ret  = 0;
     double   volt = 0.0, volt2 = 0.0;
     uint32_t adc_value = 0, curr_tick = osKernelGetTickCount();
 
@@ -64,12 +65,12 @@ int8_t liquid_ad_value_calibration()
         volt2     = ( double ) adc_value * 3.3 / 4096;
         LOG( LIQUID_MODULE, "adc_value2 = %d, volt2 = %f", adc_value, volt2 );
 
-        if ( volt > 0.2 )
+        if ( volt > 0.5 )
         {
             if ( potentioData > 0 )
             {
                 potentioData--;                     // 增大电位计R_aw端电阻
-                ad5160_1_writeByte( potentioData ); // 设置采样数字电位计U1
+                ad5160_1_writeByte( potentioData ); // 设置采样数字电位计U1,Rp2
             }
             else // 数字电位计到下极限
             {
@@ -110,7 +111,9 @@ int8_t liquid_ad_value_calibration()
     {
         ret = -2;
     }
-
+#else
+    ad5160_1_writeByte( param.U1_R );
+#endif
     return ret;
 }
 
@@ -136,13 +139,13 @@ void ad5160_gpio_init( void )
 
     GPIO_InitStruct.Pin   = AD5160_1_WCLK | AD5160_1_SDI;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull  = GPIO_PULLUP;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 
     GPIO_InitStruct.Pin   = AD5160_2_CS | AD5160_2_WCLK | AD5160_2_SDI;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull  = GPIO_PULLUP;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 }
@@ -179,7 +182,7 @@ void ad5160_delay( unsigned int z )
 }
 
 /**
- * \brief
+ * \brief 设置采样数字电位计U1,Rp2
  * \param data_resistance
  * @date 2023-12-29
  * \Author Jackie
@@ -207,7 +210,7 @@ void ad5160_1_writeByte( uint8_t data_resistance )
 }
 
 /**
- * \brief
+ * \brief 设置采样数字电位计U2,Rp1
  * \param data_resistance
  * @date 2023-12-29
  * \Author Jackie

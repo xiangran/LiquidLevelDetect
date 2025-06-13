@@ -61,9 +61,10 @@ void MX_GPIO_Init( void )
     /*Configure GPIO pin : PtPin */
     GPIO_InitStruct.Pin   = LEVEL_Pin;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull  = GPIO_PULLUP;
+    GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init( LEVEL_GPIO_Port, &GPIO_InitStruct );
+    HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_RESET );
 
     /*Configure GPIO pins : PCPin PCPin */
     GPIO_InitStruct.Pin   = CPU_STATUS_Pin | LED_RED_Pin;
@@ -81,6 +82,7 @@ void MX_GPIO_Init( void )
     GPIO_InitStruct.Pull  = GPIO_PULLDOWN;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init( HEAT_EN_GPIO_Port, &GPIO_InitStruct );
+    HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
 
     /*Configure GPIO pin : HEAT_FAULT_Pin */
     GPIO_InitStruct.Pin  = HEAT_FAULT_Pin;
@@ -89,10 +91,16 @@ void MX_GPIO_Init( void )
     HAL_GPIO_Init( HEAT_FAULT_GPIO_Port, &GPIO_InitStruct );
 
     /*Configure GPIO pins : HOST_LVL_DET_CTRL_Pin HOST_HEAT_CTRL_Pin */
-    GPIO_InitStruct.Pin  = HOST_LVL_DET_CTRL_Pin | HOST_HEAT_CTRL_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    /*GPIO_InitStruct.Pin  = HOST_LVL_DET_CTRL_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
+    HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_SET );
+
+    GPIO_InitStruct.Pin  = HOST_HEAT_CTRL_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+    HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );*/
 }
 
 /* USER CODE BEGIN 2 */

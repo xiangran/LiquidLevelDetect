@@ -90,7 +90,7 @@ int main( void )
     ad5160_init();
     DWT_Delay_Init();
     // MX_USART1_UART_Init();
-    // MX_USART3_UART_Init();
+    MX_USART3_UART_Init();
     /* USER CODE BEGIN 2 */
     printf( "===========Build Time " __DATE__ "===========\r\n" );
     printf( "===========sysclk [%dM], HAL version: 0x%08lx\r\n", HAL_RCC_GetHCLKFreq() / 1000000, HAL_GetHalVersion() );
@@ -98,7 +98,7 @@ int main( void )
 
     /* Init scheduler */
     osKernelInitialize();
-    // USART_Prepare();
+    USART_Prepare();
     /* Call init function for freertos objects (in cmsis_os2.c) */
     init_task();
 
@@ -141,7 +141,7 @@ void SystemClock_Config( void )
     RCC_OscInitStruct.PLL.PLLSource  = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLM       = RCC_PLLM_DIV2;
     RCC_OscInitStruct.PLL.PLLN       = 85;
-    RCC_OscInitStruct.PLL.PLLP       = RCC_PLLP_DIV7;
+    RCC_OscInitStruct.PLL.PLLP       = RCC_PLLP_DIV8; // ADC时钟比Core时钟快太多会导致只触发HAL_ADC_ConvHalfCpltCallback
     RCC_OscInitStruct.PLL.PLLQ       = RCC_PLLQ_DIV2;
     RCC_OscInitStruct.PLL.PLLR       = RCC_PLLR_DIV2;
     if ( HAL_RCC_OscConfig( &RCC_OscInitStruct ) != HAL_OK )

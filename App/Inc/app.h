@@ -30,9 +30,10 @@
 
 /* #define */
 #define APP_QUEUE_MAX_NO 20
-#define METHOD1_THRS ( 0.2 )
+#define METHOD1_THRS ( 0.7 )
 #define METHOD2_THRS ( 0.2 )
-#define U7R ( 240u ) // ( 256 - U7R ) / 256 * 50000 Ω + 60 = 9420
+#define U7R ( 255u ) // ( 256 - U7R ) / 256 * 50000 Ω + 60 = 9420
+#define U1R ( 65u )  // 375KHz
 #define SINE_WAVE_PERIOD ( 300u )
 #define TEST_BUFFER_SIZE ( 1000u )
 // 1 阈值/斜率
@@ -59,8 +60,9 @@ GLOBAL osMessageQueueId_t app_queue_handle;
 GLOBAL ring_buffer        liquid_ad_val;
 GLOBAL uint32_t           adc_value_buffer[SINE_WAVE_PERIOD];
 GLOBAL __IO bool          read_noise;
-GLOBAL bool               liquid_level_detect_flag;
-
+GLOBAL __IO bool          liquid_level_detect_flag;
+GLOBAL bool               host_ctrl_init_flag;
+GLOBAL bool               debug_mode;
 /* function prototypes */
 GLOBAL void          detect_liquid_level_task( void* pvParameters );
 GLOBAL void          adc_task( void* pvParameters );

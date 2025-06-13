@@ -116,7 +116,7 @@ void init_task( void )
     /* USER CODE END RTOS_QUEUES */
 
     /* Create the thread(s) */
-    // log_shell_init();
+    log_shell_init();
     /* creation of defaultTask */
     detect_liquid_level_task_handle = osThreadNew( detect_liquid_level_task, NULL, &detect_liquid_level_task_attributes );
     needle_temp_ctrl_task_handle    = osThreadNew( needle_temp_ctrl_task, NULL, &needle_temp_ctrl_task_attributes );

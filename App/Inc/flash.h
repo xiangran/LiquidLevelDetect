@@ -20,14 +20,15 @@
 /* #include */
 
 /* #define */
-#define CONFIG_FLASH_ADDR ( ( uint32_t ) 0x0800F000 )
+#define CONFIG_FLASH_ADDR ( ( uint32_t ) 0x0801F000 )
 /* typedef */
-typedef struct __attribute__( ( packed, aligned( 4 ) ) )
+typedef struct __attribute__( ( packed, aligned( 8 ) ) )
 {
     /* data */
     float    thrs1; // method1
     float    thrs2; // method2
     uint16_t U7_R;  // 电位计 U2 的值
+    uint16_t U1_R;  // 电位计 U1 的值
     uint8_t  crc8;
 } LiquidDecte_TypeDef;
 

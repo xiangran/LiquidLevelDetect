@@ -36,14 +36,15 @@ void flash_init()
 
     if ( crc == param.crc8 )
     {
-        LOG( APP_MODULE, "read param success, thrs1:%f, thrs2:%f", ( double ) param.thrs1, ( double ) param.thrs2 );
+        LOG( APP_MODULE, "read param success, thrs1:%f, thrs2:%f, u7_r:%d, u1_r:%d", ( double ) param.thrs1, ( double ) param.thrs2, param.U7_R, param.U1_R );
     }
     else
     {
         param.thrs1 = METHOD1_THRS;
         param.thrs2 = METHOD2_THRS;
         param.U7_R  = U7R;
-        LOG( APP_MODULE, "read param fail, reset thrs: %f, %f", ( double ) param.thrs1, ( double ) param.thrs2 );
+        param.U1_R  = U1R;
+        LOG( APP_MODULE, "read param fail, reset thrs: %f, %f, u7_r: %d, u1_r: %d", ( double ) param.thrs1, ( double ) param.thrs2, param.U7_R, param.U1_R );
     }
 }
 

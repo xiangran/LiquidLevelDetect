@@ -5,12 +5,12 @@
             "includePath": [
                 "${workspaceFolder}/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
                 "${workspaceFolder}/Core/Inc",
-                "C:\\Users\\xiang\\OneDrive\\文档\\Framework\\STM32CubeG4\\Drivers\\STM32G4xx_HAL_Driver\\Inc",
-                "C:\\Users\\xiang\\OneDrive\\文档\\Framework\\STM32CubeG4\\Drivers\\STM32G4xx_HAL_Driver\\Inc\\Legacy",
+                "D:\\Proj\\STM32G4Driver\\STM32G4xx_HAL_Driver\\Inc",
+                "D:\\Proj\\STM32G4Driver\\STM32G4xx_HAL_Driver\\Inc\\Legacy",
                 "${workspaceFolder}/Middlewares\\Third_Party\\FreeRTOS\\Source\\include",
                 "${workspaceFolder}/Middlewares\\Third_Party\\FreeRTOS\\Source\\portable\\IAR\\ARM_CM4F",
-                "C:/Users/xiang/OneDrive/文档/Framework/STM32CubeG4/Drivers/CMSIS/Device/ST/STM32G4xx/Include",
-                "C:/Users/xiang/OneDrive/文档/Framework/STM32CubeG4/Drivers/CMSIS/Include",
+                "D:/Proj/STM32G4Driver/CMSIS/Device/ST/STM32G4xx/Include",
+                "D:/Proj/STM32G4Driver/CMSIS/Include",
                 "${workspaceFolder}/App/Inc",
                 "${workspaceFolder}/Middlewares/Trace/inc",
                 "${workspaceFolder}/Middlewares/Shell",
@@ -23,11 +23,18 @@
                 "USE_HAL_DRIVER",
                 "STM32G431xx"
             ],
-            "windowsSdkVersion": "10.0.22621.0",
             "compilerPath": "C:/Program Files (x86)/GNU Arm Embedded Toolchain/10 2021.10/bin/arm-none-eabi-gcc-10.3.1.exe",
             "cStandard": "gnu11",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "windows-gcc-arm"
+            "intelliSenseMode": "windows-gcc-arm",
+            //"configurationProvider": "iarsystems.iar-build"
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "path": [
+                    "${workspaceFolder}"
+                ]
+            } //源文件搜索路径。据说是用来做代码补全和查找定义的，但是我测试后发现删去也不影响使用，不过还是留着吧
         }
     ],
     "version": 4
