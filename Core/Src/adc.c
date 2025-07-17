@@ -458,7 +458,7 @@ void HAL_ADC_ConvCpltCallback( ADC_HandleTypeDef* hadc )
         }
         else
         {
-            // if ( val > noise )
+            // if ( val > noise)
             {
                 ring_buffer_save_isr( &liquid_ad_val, val );
             }

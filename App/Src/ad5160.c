@@ -50,22 +50,44 @@ int8_t liquid_ad_value_calibration()
 {
     int8_t ret = 0;
 #if 0
-    uint8_t  potentioData = 127, calibrate_cnt = 0;
+    uint8_t  potentioData = 127, calibrate_cnt = 0, read_cnt = 0;
     double   volt = 0.0, volt2 = 0.0;
     uint32_t adc_value = 0, curr_tick = osKernelGetTickCount();
+    uint32_t sum = 0, buffer[10] = { 0 }, max_val = 0, min_val = 0xffffffff;
 
     do
     {
         osDelay( 5 );
         // 读取锁相环SF_OUT输出电压
-        adc_value = get_adc1_value( ADC_CHANNEL_12 );
-        volt      = ( double ) adc_value * 3.3 / 4096;
+        adc_value          = get_adc1_value( ADC_CHANNEL_12 );
+        buffer[read_cnt++] = adc_value;
+        if ( read_cnt < 10 )
+            continue;
+        else
+        {
+            max_val  = 0;
+            min_val  = 0xffffffff;
+            read_cnt = 0;
+            sum      = 0;
+
+            for ( int i = 0; i < 10; i++ )
+            {
+                if ( buffer[i] > max_val )
+                    max_val = buffer[i];
+                if ( buffer[i] < min_val )
+                    min_val = buffer[i];
+                sum += buffer[i];
+            }
+            adc_value = ( sum - max_val - min_val ) / 8;
+        }
+
+        volt = ( double ) adc_value * 3.3 / 4096;
         LOG( LIQUID_MODULE, "adc_value = %d, volt = %f, potentioData = %d", adc_value, volt, potentioData );
         adc_value = adc_chn_average_value( LIQUID_DET_ADC_Pin, 10 );
         volt2     = ( double ) adc_value * 3.3 / 4096;
         LOG( LIQUID_MODULE, "adc_value2 = %d, volt2 = %f", adc_value, volt2 );
 
-        if ( volt > 0.5 )
+        if ( volt > 1.8 )
         {
             if ( potentioData > 0 )
             {
@@ -78,7 +100,7 @@ int8_t liquid_ad_value_calibration()
             }
             calibrate_cnt = 0;
         }
-        else if ( volt < 0.1 )
+        else if ( volt < 1.5 )
         {
             if ( potentioData < 255 )
             {
@@ -132,7 +154,7 @@ void ad5160_gpio_init( void )
 
     /*Configure GPIO pins : PBPin PBPin */
     GPIO_InitStruct.Pin   = AD5160_1_CS;
-    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
     GPIO_InitStruct.Pull  = GPIO_PULLUP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init( GPIOA, &GPIO_InitStruct );
@@ -143,7 +165,13 @@ void ad5160_gpio_init( void )
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
 
-    GPIO_InitStruct.Pin   = AD5160_2_CS | AD5160_2_WCLK | AD5160_2_SDI;
+    GPIO_InitStruct.Pin   = AD5160_2_CS;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
+
+    GPIO_InitStruct.Pin   = AD5160_2_WCLK | AD5160_2_SDI;
     GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull  = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;

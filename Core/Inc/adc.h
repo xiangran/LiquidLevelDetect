@@ -43,7 +43,7 @@ extern "C"
     GLOBAL ADC_HandleTypeDef hadc1;
     GLOBAL ADC_HandleTypeDef hadc2;
     GLOBAL DMA_HandleTypeDef hdma_adc1;
-	GLOBAL DMA_HandleTypeDef hdma_adc2;
+    GLOBAL DMA_HandleTypeDef hdma_adc2;
     /* USER CODE BEGIN Private defines */
 
     /* USER CODE END Private defines */

@@ -48,7 +48,7 @@ const osMutexAttr_t logMutex_attr   = { "logMutex", osMutexRecursive, NULL, NULL
 
 static const osThreadAttr_t log_task_attr = {
     .name       = "SHELL_LOG",
-    .priority   = ( osPriority_t ) osPriorityNormal,
+    .priority   = ( osPriority_t ) osPriorityAboveNormal,
     .stack_size = 1200,
 };
 

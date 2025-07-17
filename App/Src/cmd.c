@@ -193,28 +193,26 @@ SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAI
  * @date 2025-01-23
  * \Author Jackie
  */
-void heat_ctrl( int argc, char* argv[] )
+void heat_cmd( int argc, char* argv[] )
 {
-    if ( argc == 3 )
+    if ( argc == 2 )
     {
-        int ctrl   = atoi( argv[2] );
-        debug_mode = atoi( argv[1] );
+        int ctrl = atoi( argv[1] );
+        // debug_mode = atoi( argv[1] );
 
         if ( ctrl == 1 )
         {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
-            LOG( CAN_MODULE, "heat on" );
+            heat_ctrl( true );
+            LOG( CAN_MODULE, "heating is on" );
         }
         else
         {
-            HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
-            HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
-            LOG( CAN_MODULE, "heat off" );
+            heat_ctrl( false );
+            LOG( CAN_MODULE, "heating is off" );
         }
     }
 }
-SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, heat, heat_ctrl, heat ctrl\n );
+SHELL_EXPORT_CMD( SHELL_CMD_PERMISSION( 0 ) | SHELL_CMD_TYPE( SHELL_TYPE_CMD_MAIN ) | SHELL_CMD_DISABLE_RETURN, heat, heat_cmd, heat ctrl\n );
 
 /**
  * \brief

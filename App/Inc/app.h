@@ -30,10 +30,10 @@
 
 /* #define */
 #define APP_QUEUE_MAX_NO 20
-#define METHOD1_THRS ( 0.7 )
+#define METHOD1_THRS ( 1.0 )
 #define METHOD2_THRS ( 0.2 )
 #define U7R ( 255u ) // ( 256 - U7R ) / 256 * 50000 Ω + 60 = 9420
-#define U1R ( 65u )  // 375KHz
+#define U1R ( 17u )  // 375KHz
 #define SINE_WAVE_PERIOD ( 300u )
 #define TEST_BUFFER_SIZE ( 1000u )
 // 1 阈值/斜率

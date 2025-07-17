@@ -58,6 +58,10 @@ void needle_temp_ctrl_task( void* pvParameters )
     const double GAIN    = 2.0;     // 运放增益 = 1 + (R8/R11) = 2
 
     // LOG( CAN_MODULE, "ntc task init complete" );
+    while ( !liquid_level_detect_flag )
+    {
+        osDelay( 100 );
+    }
 
     while ( true )
     {
@@ -96,8 +100,30 @@ void needle_temp_ctrl_task( void* pvParameters )
                 }
             }
         }
-        LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", v_adc_ntc, ntc_curr_resistance, needle_temperature );
-        // flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
+
+        if ( needle_temperature >= 40.0 && is_heating > 0 )
+        {
+            is_heating++;
+            if ( is_heating > 3 )
+            {
+                // LOG( CAN_MODULE, "heating is off" );
+                heat_ctrl( false );
+                is_heating = 0;
+                osDelay( 1000 );
+                ring_buffer_clear( &liquid_ad_val );
+                start_check_liquid_level();
+            }
+        }
+        else if ( needle_temperature <= 35.0 && is_heating == 0 )
+        {
+            // LOG( CAN_MODULE, "heating is on" );
+            HAL_ADC_Stop_DMA( &hadc2 );
+            ring_buffer_clear( &liquid_ad_val );
+            heat_ctrl( true );
+            is_heating = 1;
+        }
+        // LOG( CAN_MODULE, "ntc volt:%f, R:%f, temp:%f", v_adc_ntc, ntc_curr_resistance, needle_temperature );
+        //  flt = HAL_GPIO_ReadPin( HEAT_FAULT_GPIO_Port, HEAT_FAULT_Pin );
 
         osDelay( 1000 );
     }
@@ -259,3 +285,32 @@ void timestamp_sync( CmdCtx_TypeDef* cmd, CmdErrorOpts_TypeDef* ret )
     HAL_RTC_SetDate( &hrtc, &sdate, RTC_FORMAT_BIN );
     HAL_RTC_SetTime( &hrtc, &stime, RTC_FORMAT_BIN );
 }
+
+/**
+ * \brief 加热控制
+ * \param turn_on
+ * @date 2025-06-23
+ * \Author Jackie
+ */
+void heat_ctrl( bool turn_on )
+{
+    if ( turn_on )
+    {
+        HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_SET );
+        HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET );
+    }
+    else
+    {
+        HAL_GPIO_WritePin( HEAT_EN_GPIO_Port, HEAT_EN_Pin, GPIO_PIN_RESET );
+        HAL_GPIO_WritePin( LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET );
+    }
+}
+
+/**
+ * \brief
+ * \retval true
+ * \retval false
+ * @date 2025-07-02
+ * \Author Jackie
+ */
+bool isHeating() { return ( is_heating > 0 ); }

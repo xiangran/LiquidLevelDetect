@@ -329,6 +329,7 @@ GLOBAL NTC10K_B3950_TypeDef lookUpTable[LOOK_UP_TABLE_ELEMENTS]
 
 GLOBAL uint32_t adc1_value_buffer[2];
 GLOBAL double   needle_temperature;
+GLOBAL uint8_t  is_heating;
 /* function prototypes */
 GLOBAL void needle_temp_ctrl_task( void* pvParameters );
 GLOBAL void cmd_task_entry( void* parameter );
@@ -337,5 +338,7 @@ GLOBAL void cmd_response( Uplink_Protoc_Function_TypeDef cmd, CmdErrorOpts_TypeD
 GLOBAL void liquid_detect_ctrl( CmdCtx_TypeDef* cmd, CmdErrorOpts_TypeDef* ret );
 GLOBAL void drv_version( CmdCtx_TypeDef* cmd, CmdErrorOpts_TypeDef* ret );
 GLOBAL void timestamp_sync( CmdCtx_TypeDef* cmd, CmdErrorOpts_TypeDef* ret );
+GLOBAL void heat_ctrl( bool turn_on );
+GLOBAL bool isHeating();
 
 #endif

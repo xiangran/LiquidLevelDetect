@@ -33,7 +33,7 @@
 /* typedef */
 
 /* static variables */
-
+static uint32_t adc_data_buffer[SINE_WAVE_PERIOD];
 /* static constants */
 
 /* static function prototypes */
@@ -49,7 +49,7 @@
  */
 void detect_liquid_level_task( void* pvParameters )
 {
-    uint32_t adc_value = 0, k_cnt = 0, thrs_cnt = 0;
+    uint32_t k_cnt = 0, thrs_cnt = 0, read_num = 0, i = 0;
     double   voltage = 0.0, k_step_value = 0.0;
     bool     liquid_detected = false;
 
@@ -97,19 +97,23 @@ void detect_liquid_level_task( void* pvParameters )
     osDelay( 500 );
     HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
     // LOG( APP_MODULE, "init complete, noise: %d", noise );
+    liquid_level_detect_flag = true;
 
     while ( true )
     {
         // analyse 3 data
-        if ( ring_buffer_data_num( &liquid_ad_val ) )
+        if ( ( read_num = ring_buffer_data_num( &liquid_ad_val ) ) > 0 )
         {
-            ring_buffer_read( &liquid_ad_val, &adc_value, 1 );
+            if ( read_num > SINE_WAVE_PERIOD )
+                read_num = SINE_WAVE_PERIOD;
 
-            // if ( liquid_level_detect_flag )
+            ring_buffer_read( &liquid_ad_val, adc_data_buffer, read_num );
+
+            for ( i = 0; i < read_num; i++ )
             {
-                voltage = ( double ) adc_value * 3.3 / 4096;
-                if ( voltage > 0.1 )
-                    printf( "%f\r\n", voltage );
+                voltage = ( double ) adc_data_buffer[i] * 3.3 / 4096;
+                // if ( voltage > 0.1 )
+                //     printf( "%f\r\n", voltage );
 
                 // 阈值法
                 if ( voltage > ( double ) param.thrs1 )
@@ -121,7 +125,7 @@ void detect_liquid_level_task( void* pvParameters )
                 {
                     thrs_cnt = 0;
                 }
-
+#if 0
                 // 斜率法
                 if ( voltage > ( double ) param.thrs2 )
                 {
@@ -141,35 +145,36 @@ void detect_liquid_level_task( void* pvParameters )
                         k_cnt++;
                     }
                 }
+#endif
             }
-        }
 
-        // 阈值
-        if ( thrs_cnt )
-        {
-            HAL_ADC_Stop_DMA( &hadc2 );
-            liquid_detected = true;
-        }
-        else if ( k_cnt > 2 ) // 斜率
-        {
-            HAL_ADC_Stop_DMA( &hadc2 );
-            liquid_detected = true;
-        }
+            // 阈值
+            if ( thrs_cnt )
+            {
+                HAL_ADC_Stop_DMA( &hadc2 );
+                liquid_detected = true;
+            }
+            else if ( k_cnt > 2 ) // 斜率
+            {
+                HAL_ADC_Stop_DMA( &hadc2 );
+                liquid_detected = true;
+            }
 
-        if ( liquid_detected )
-        {
-            thrs_cnt        = 0;
-            k_cnt           = 0;
-            liquid_detected = false;
-            HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_SET );
-            // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_RESET );
-            HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_RESET );
-            osDelay( 1000 );
-            HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_RESET );
-            // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_SET );
-            HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
-            ring_buffer_clear( &liquid_ad_val );
-            start_check_liquid_level();
+            if ( liquid_detected )
+            {
+                thrs_cnt        = 0;
+                k_cnt           = 0;
+                liquid_detected = false;
+                HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_SET );
+                // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_RESET );
+                HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_RESET );
+                osDelay( 1000 );
+                HAL_GPIO_WritePin( LEVEL_GPIO_Port, LEVEL_Pin, GPIO_PIN_RESET );
+                // HAL_GPIO_WritePin( HOST_LVL_DET_CTRL_GPIO_Port, HOST_LVL_DET_CTRL_Pin, GPIO_PIN_SET );
+                HAL_GPIO_WritePin( CPU_STATUS_GPIO_Port, CPU_STATUS_Pin, GPIO_PIN_SET );
+                ring_buffer_clear( &liquid_ad_val );
+                start_check_liquid_level();
+            }
         }
     }
 }
